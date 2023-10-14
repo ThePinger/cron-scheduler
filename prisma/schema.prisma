@@ -9,3 +9,41 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Job {
+  id                  String    @id
+  name                String?
+  // Scheduling Frequency in seconds
+  schedulingFrequency Int       @default(3600)
+  // Job timeout in seconds (0 = no timeout)
+  timeout             Int       @default(0)
+  //TODO: Store Function to be executed
+  //function
+  paramaters          Json?
+  isActive            Boolean   @default(true)
+  lastRunAt           DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  jobRuns             JobRun[]
+}
+
+model JobRun {
+  id        String       @id @default(cuid())
+  jobId     String
+  job       Job          @relation(fields: [jobId], references: [id])
+  startedAt DateTime     @default(now())
+  endedAt   DateTime?
+  status    JobRunStatus @default(RUNNING)
+  //TODO: Store Result and Error
+  // result
+  // error    
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+enum JobRunStatus {
+  RUNNING
+  SUCCESSFUL
+  FAILED
+  TIMEDOUT
+}
